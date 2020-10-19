@@ -1,0 +1,59 @@
+import numpy as np
+import pandas as pd
+import astropy.constants as c
+import scipy
+from scipy import stats
+import math
+from astropy.io import fits
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rc('font', family='serif')
+
+
+
+
+grb = fits.open('gll_2flgc.fits') #importing data
+
+table=grb[1].data
+grb.close
+
+
+
+plt.figure(figsize = (15, 10))
+n=0
+
+for i in table:
+    if i['LUMINOSITY_DISTANCE'] !=0:  #looping through data where z isnt 0
+        n=n+1
+        name = i['GCNNAME']
+        z = i['REDSHIFT']
+        dl = i['LUMINOSITY_DISTANCE']
+        t_end = i['LC_END']
+        ene_flux = i['LC_ENE_FLUX']
+        ene_flux_err = i['LC_ENE_FLUX_ERR']
+        fluence = i['LC_FLUENCE']
+        flux = i['LC_FLUX']
+        flux_err = i['LC_FLUX_ERR']
+        indec = i['LC_INDEX']
+        index_err = i['LC_INDEX_ERR']
+        median = i['LC_MEDIAN']
+        t_start = i['LC_START']
+        ts = i['LC_TS']
+        
+        B = 1.9999999999
+        T = (t_end-t_start)/(1+z)
+        T_err = T/2
+        lum = ene_flux*4*(np.pi)*(dl**2)*((1+z)**(B-1))
+        lum_err = ene_flux_err*4*(np.pi)*(dl**2)*((1+z)**(B-1))
+
+        
+        
+        plt.scatter(T, lum, label=i['GCNNAME'] )
+        plt.yscale('log')
+        plt.xscale('log')
+        plt.xlabel('log(T/(1+z)) [s]',fontsize = 18) 
+        plt.ylabel('log(L) [erg/cm^2/s]',fontsize = 18) 
+        plt.title('Preliminary Light Curves of LAT GRBs (GeV range)',fontsize = 18) 
+        plt.tick_params(axis='both', which='major', labelsize=18)
+        mpl.pyplot.errorbar(T, lum, lum_err, T/2, linestyle='',elinewidth=0.5)
+        plt.legend()
