@@ -9,6 +9,28 @@ Created on Thu Nov 19 14:52:10 2020
 # imports
 import numpy as np
 
+# open afterglow data
+with open("Radio_data.txt") as file_1:
+    # splits data into lines
+    data_1 = file_1.readlines()
+
+
+
+names = []
+GRB_sample = []         # names of all GRBs in sample
+z_sample = []
+
+# generate list of GRBs in sample
+for i in data_1:
+    
+    # splits data into rows
+    row = i.split()
+    names.append(row[0])
+
+for GRB in names:
+    if GRB not in GRB_sample:
+        GRB_sample.append(GRB)
+
 
 
 """
@@ -17,23 +39,36 @@ REDSHIFTS
 # open redshift data
 
 GRB_redshift=[]
-Redshift=[]
+Redshift= []        # all redshifts
+sample= []
+z_sample = []       # redshifts in sample
 
 with open('Redshifts.txt') as fp:
 
     for line in fp.readlines():
         row=line.split()
+        
         try:
             if float(row[-1]) <10:  #Redshift if present is last entry of row and is a number, but last value may be a GCN/IAU circular number, redshift will always be a value less than 10 so only keep value if <10.
-                GRB_redshift.append(row[0])
-                Redshift.append(float(row[-1]))
+                z = float(row[-1])
+                GRB_redshift.append([row[0], z])
+                Redshift.append(z)
+                
+
         except:
             pass   
 
 
+GRB_z = [item for item in GRB_redshift if item[0] in GRB_sample]
 
-    
-"""  
+z_all = []
+
+for data in GRB_z:
+    z_all.append(data[1])
+
+
+
+"""
 LUMINOSITY DISTANCE
 """
 
@@ -59,7 +94,7 @@ n=1000         # number of points in integrals
 # empty list for data
 d_l_data = []
 
-for z in Redshift:
+for z in z_all:
 
     az = 1.0/(1+1.0*z)
     
