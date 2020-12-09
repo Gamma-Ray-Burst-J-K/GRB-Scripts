@@ -41,7 +41,7 @@ freq = []
     
 for i in freq_flux_all[1:]:
     
-    # removes count if no frequency recorded
+    # removes count if no flux recorded
     if i[1] == '-99':
         continue
     
@@ -80,7 +80,7 @@ freq_new = []
     
 for i in freq_flux_all_new[1:]:
     
-    # removes count if no frequency recorded
+    # removes count if no flux recorded
     if i[1] == '-99':
         continue
     
@@ -94,19 +94,19 @@ PLOTS
 """
 
 # plot histogram of frequencies for new data
+plt.figure(figsize=(8,3))
 plt.title('Histogram of frequencies for old data')
-fig = plt.subplot
 plt.hist(freq, bins = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
 plt.xlabel("Frequency [GHz]")
-plt.xscale("log")
+plt.semilogx(basex=2)
 plt.ylabel("No. of counts")
 plt.show()      
 
 # plot histogram of frequencies for old data
+plt.figure(figsize=(8,3))
 plt.title('Histogram of frequencies for updated data')
-fig = plt.subplot
 plt.hist(freq_new, bins = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
 plt.xlabel("Frequency [GHz]")
-plt.xscale("log")
+plt.semilogx(basex=2)
 plt.ylabel("No. of counts")
 plt.show()
