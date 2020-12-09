@@ -94,7 +94,7 @@ for GRB in names:
     if GRB not in GRB_sample:
         GRB_sample.append(GRB)
         
-    
+  
 # open redshift data
 
 GRB_redshift=[]
@@ -220,7 +220,7 @@ for name, z, d_l in zip(GRB_all, z_all, d_l_all):
 
 
 """
-ALL FLUX CURVES
+DATA FOR GIVEN FREQUENCY
 """
 
 # empty array to hold data for 8.46GHz
@@ -281,6 +281,10 @@ for i in data_1:
 
 
 
+"""
+FLUX AND LUMINOSITY CURVES (8GHz)
+"""
+
 # first GRB in the radio data with a redshift
 first_GRB =  GRB_name[0] 
 
@@ -309,9 +313,9 @@ for row in data_freq:
     else:
         
         if len(flux) >= 3:
-            
+
             """
-            # flux curve plot
+            # plot scatter graph of the individual flux curves
             fig = plt.subplot()
             plt.title(f'Flux in the 8.56GHz band for GRB{GRB}')
             plt.scatter(time, flux)
@@ -337,7 +341,8 @@ for row in data_freq:
                     lum = L(flux, d_l, z, beta)
                     lum_err = L_err(flux_err, d_l, z, beta)
                     
-                    # plot scatter graph of the luminosity
+                    """
+                    # plot scatter graph of the individual luminosity curves
                     plt.title('Luminosity in the 8.56GHz band for GRB{GRB}')
                     plt.scatter(time, lum)
                     plt.errorbar(time, lum, yerr = lum_err, fmt = ' ')
@@ -346,6 +351,7 @@ for row in data_freq:
                     plt.yscale("log")
                     plt.ylabel("Luminosity in 8.5GHz band [erg s^-1]")
                     plt.show()
+                    """
                     
                     # Adds GRB to list if it gets plot
                     GRB_plot.append(GRB)
@@ -359,5 +365,124 @@ for row in data_freq:
         # move to next GRB
         first_GRB = GRB
         continue
-   
-print(len(GRB_plot))
+
+"""
+FLUX AND LUMINOSITY CURVES (4.5GHz)
+"""
+
+# first GRB in the radio data with a redshift
+first_GRB =  GRB_name[0] 
+
+# empty arrays to store data
+time = []
+flux = []
+flux_err = []
+GRB_plot_4 = []
+
+# loop through rows in data for 8.46GHz
+for row in data_freq_4:
+    
+    # get name of GRB for that row
+    GRB = row[0]
+    
+    # if GRB matches previous, add it to the array
+    if re.match(GRB, first_GRB):
+        
+        # Adds data to array for that GRB
+        time.append(row[1])
+        flux.append(row[2])
+        flux_err.append(row[3])
+
+    
+    # when it stops matching, plot the data and reset the arrays  
+    else:
+        
+        if len(flux) >= 3:
+            
+            """
+            # plot scatter graph of the individual flux curves
+            fig = plt.subplot()
+            plt.title(f'Flux in the 8.56GHz band for GRB{GRB}')
+            plt.scatter(time, flux)
+            plt.errorbar(time, flux, yerr = flux_err, fmt = ' ')
+            plt.xscale("log")
+            plt.xlabel("Time [days]")
+            plt.yscale("log")
+            plt.ylabel(r'Flux in 8.5GHz band [$\mu$Jy]')
+            plt.show()
+            """
+            
+            # identify redshift and luminosity distance for that GRB
+            for j in GRB_z_d_l:
+                
+                x = j[0]
+                
+                if re.match(GRB, x):
+                    
+                    z = j[1]
+                    d_l = j[2]
+                    
+                    # call on luminosity function to plot lum curves
+                    lum = L(flux, d_l, z, beta)
+                    lum_err = L_err(flux_err, d_l, z, beta)
+                    
+                    """
+                    # plot scatter graph of the individual luminosity curves
+                    plt.title('Luminosity in the 8.56GHz band for GRB{GRB}')
+                    plt.scatter(time, lum)
+                    plt.errorbar(time, lum, yerr = lum_err, fmt = ' ')
+                    plt.xscale("log")
+                    plt.xlabel("Time [days]")
+                    plt.yscale("log")
+                    plt.ylabel("Luminosity in 8.5GHz band [erg s^-1]")
+                    plt.show()
+                    """
+                    
+                    # Adds GRB to list if it gets plot
+                    GRB_plot_4.append(GRB)
+            
+        
+        # reset the arrays
+        time = []
+        flux = []
+        flux_err = []
+        
+        # move to next GRB
+        first_GRB = GRB
+        continue
+
+
+
+"""
+NO. OF GRBS
+"""
+
+# empty lists
+no_GRB = []
+no_GRB_4 = []
+no_overlap = []
+
+# names of all GRBs with 8GHz curve
+for GRB in GRB_plot:
+    if GRB not in no_GRB:
+        no_GRB.append(GRB)
+
+# names of all GRBs with 4.5GHz curve
+for GRB in GRB_plot_4:
+    if GRB not in no_GRB_4:
+        no_GRB_4.append(GRB)
+        
+no_overlap = [item for item in GRB_plot if item in GRB_plot_4]
+
+print("8GHz GRBs:")
+print(no_GRB)
+
+print("4.5GHz GRBs:")
+print(no_GRB_4)
+
+print("Overlap:")
+print(no_overlap)
+
+print("The number of GRBs with 8GHz lightcurves is", len(no_GRB))
+print("The number of GRBs with 4.5GHz lightcurves is", len(no_GRB_4))
+print("The number with both 8GHz and 4.5GHz lightcurves is", len(no_overlap))
