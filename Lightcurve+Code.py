@@ -267,7 +267,6 @@ flux_err_array_4 = []
 data_freq_4 = []
 
 
-
 # split data by GRB
 for i in data_1:
     
@@ -314,6 +313,102 @@ for item in data_freq_all:
         data_freq.append(item)
 
 
+ 
+# In[57]:
+
+
+
+"""
+PLOT OF ALL DATA
+"""
+
+# first GRB in the radio data with a redshift
+first_GRB =  GRB_name[0] 
+
+# empty arrays to store data
+time = []
+flux = []
+flux_err = []
+GRB_plot = []
+GRB_plot_f = []
+time_all = []
+lum_all = []
+lum_err_all = []
+GRB_all = []
+data_all = []
+
+# loop through rows in data for 8.46GHz
+for row in data_freq:
+    
+    # get name of GRB for that row
+    GRB = row[0]
+    
+    # if GRB matches previous, add it to the array
+    if re.match(GRB, first_GRB):
+        
+        # removes points where error is larger than the recorded value
+        if row[2] > row[3]:
+            
+            # Adds data to array for that GRB
+            time.append(row[1])
+            flux.append(row[2])
+            flux_err.append(row[3])
+
+    
+    # when it stops matching, plot the data and reset the arrays  
+    else:
+        
+        if len(flux) >= 3:
+            
+            # identify redshift and luminosity distance for that GRB
+            for j in GRB_z_d_l:
+                
+                x = j[0]
+                
+                if re.match(GRB, x):
+                    
+                    z = j[1]
+                    d_l = j[2]
+                    
+                    # call on luminosity function to plot lum curves
+                    lum = L(flux, d_l, z, beta)
+                    lum_err = L_err(flux_err, d_l, z, beta)
+                    
+                    lum_all.append(lum)
+                    lum_err_all.append(lum_err)
+                    time_all.append(time)
+                    GRB_all.append(first_GRB)
+                    data_all.append([first_GRB, lum, lum_err, time])
+                    
+        # reset the arrays
+        time = []
+        flux = []
+        flux_err = []
+        
+        # move to next GRB
+        first_GRB = GRB
+        continue
+
+# plot scatter graph of all data points
+plt.figure(figsize = (12, 8))
+plt.title('All of the radio afterglow luminosity light curves from the sample')
+plt.xscale("log")
+plt.xlabel("Time [days]")
+plt.yscale("log")
+plt.ylabel("Luminosity in 8.5GHz band [erg s^-1]")
+
+# loop through data and plot each GRB onto the plot
+for x in data_all:
+    
+    plt.scatter(x[3], x[1], label=f'{x[0]}')
+    plt.errorbar(x[3], x[1], yerr = x[2], fmt = ' ') 
+
+plt.vlines(x=10, ymin=1e28, ymax=1e33, colors='black', linestyles='solid', label='T')
+plt.legend(bbox_to_anchor = (1 , 1))
+plt.show()       
+        
+    
+    
 # In[49]:
 
 
@@ -333,6 +428,7 @@ GRB_plot_f = []
 time_all = []
 lum_all = []
 lum_err_all = []
+data_all = []
 
 # loop through rows in data for 8.46GHz
 for row in data_freq:
@@ -359,22 +455,25 @@ for row in data_freq:
             
             """
             # plot scatter graph of the individual flux curves
-            fig = plt.subplot()
+            f = plt.figure()
+            f.set_figwidth(8) 
+            f.set_figheight(5)
             plt.title(f'Flux in the 8.56GHz band for GRB{first_GRB}')
-            plt.scatter(time, flux)
+            plt.scatter(time, flux, label=flux)
             plt.errorbar(time, flux, yerr = flux_err, fmt = ' ')
             plt.xscale("log")
             plt.xlabel("Time [days]")
             plt.yscale("log")
             plt.ylabel(r'Flux in 8.5GHz band [$\mu$Jy]')
+            plt.legend()
             plt.show()
             """
             
             #print(flux)
             #print(flux_err)
             
-            # Adds GRB to list if flux curve is plot
-            GRB_plot_f.append(GRB)
+            # adds GRB to list if flux curve is plot
+            GRB_plot_f.append(first_GRB)
             
             # identify redshift and luminosity distance for that GRB
             for j in GRB_z_d_l:
@@ -392,25 +491,22 @@ for row in data_freq:
                     
                     
                     # plot scatter graph of the individual luminosity curves
+                    f = plt.figure()
+                    f.set_figwidth(8) 
+                    f.set_figheight(5)
                     plt.title(f'Luminosity in the 8.46GHz band for GRB{first_GRB}')
-                    plt.scatter(time, lum)
-                    plt.errorbar(time, lum, yerr = lum_err, fmt = ' ', ecolor='black')
+                    plt.scatter(time, lum, label='luminosity')
+                    plt.errorbar(time, lum, yerr = lum_err, fmt = ' ')
                     plt.xscale("log")
                     plt.xlabel("Time [days]")
                     plt.yscale("log")
                     plt.ylabel("Luminosity in 8.5GHz band [erg s^-1]")
+                    plt.vlines(x=10, ymin=1e29, ymax=1e32, colors='black', linestyles='solid', label='T')
+                    plt.legend()
                     plt.show()
                     
-                    #print(lum)
-                    #print(lum_err)
-                    #print(time)
-                    
-                    # Adds GRB to list if luminosity curve is plot
-                    GRB_plot.append(GRB)
-                    
-                    time_all.extend(time)
-                    lum_all.extend(lum)
-                    lum_err_all.extend(lum_err)
+                    # adds GRB to list if luminosity curve is plot
+                    GRB_plot.append(first_GRB)
                     
         # reset the arrays
         time = []
@@ -422,27 +518,7 @@ for row in data_freq:
         continue
 
 
-# In[57]:
-
-
-"""
-PLOT OF ALL DATA
-"""
-
-# plot scatter graph of all data points
-f = plt.figure() 
-f.set_figwidth(10) 
-f.set_figheight(7)
-plt.title('All of the luminosity curves')
-plt.scatter(time_all, lum_all)
-plt.errorbar(time_all, lum_all, yerr = lum_err_all, fmt = ' ') 
-plt.xscale("log")
-plt.xlabel("Time [days]")
-plt.yscale("log")
-plt.ylabel("Luminosity in 8.5GHz band [erg s^-1]")
-plt.show()
-
-
+        
 # In[64]:
 
 
